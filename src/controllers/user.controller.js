@@ -302,13 +302,14 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
+
   if (!username?.trim) {
     throw new ApiError(400, "Username is required");
   }
   const channel = await User.aggregate([
     {
       $match: {
-        username: username.toLowerCase(),
+        username: username?.toLowerCase(),
       },
     },
     {
@@ -340,19 +341,20 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             if: {
               $in: [req.user?._id, "$subscribers.subscriber"],
             },
+            then: true,
+            else: false,
           },
         },
       },
     },
     {
-      // project only necessary things
       $project: {
-        fullname: 1,
+        fullName: 1,
         username: 1,
-        avatar: 1,
         subscribersCount: 1,
-        subscriptionsCount: 1,
+        channelsSubscribedToCount: 1,
         isSubscribed: 1,
+        avatar: 1,
         coverImage: 1,
         email: 1,
       },
